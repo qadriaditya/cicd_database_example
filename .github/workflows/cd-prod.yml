@@ -19,12 +19,14 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           port: 22
           script: |
-            echo "Berhasil Connect ke server"
-             if[ -d "/home/qadriaditya0"]; then
-               echo "Ada folder qadriaditya0"
-               cd /home/qadriaditya0
-               echo "berhasil masuk ke folder qadriaditya0"
-             else
-               echo "Tidak ada folder qadriaditya0, membuat folder..."
-               sudo mkdir /home/qadriaditya0
-             fi
+            echo "Berhasil Connect ke Server"
+            if [ -d "/home/qadriaditya0" ]; then
+              echo "Folder /home/qadriaditya0 ditemukan"
+              cd /home/qadriaditya0
+              echo "Berhasil Masuk ke Folder"
+            else
+              echo "Folder /home/qadriaditya0 tidak ditemukan, membuat folder..."
+              sudo mkdir /home/qadriaditya0
+              echo "Berhasil Masuk ke Folder"
+              cd /home/qadriaditya0
+            fi
