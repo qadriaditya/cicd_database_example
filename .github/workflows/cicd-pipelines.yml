@@ -1,8 +1,7 @@
 name: CICD Database Dev to Prod
-
 on:
   push:
-    branch:
+    branches:
       - main
 
 jobs:
@@ -10,19 +9,39 @@ jobs:
     name: Database CI/CD
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.2.2 # Checkout ke repository code yang kita gunakan
-      - name: SSH Connect
-        uses: appleboy/ssh-action@v1.2.2 # Digunakan SSH Connect appleboy
+      - name: Checkout  My Code
+        uses: actions/checkout@v4 #checkout the code from the repository
+
+      - name: Execute remote SSH commands using password
+        uses: appleboy/ssh-action@v1 # SSH action to run commands on a remote server
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          password: ${{ secrets.SERVER_PASSWORD }}
+          host: ${{ secrets.SERVER_HOST }} # The remote server's IP address or hostname
+          username: ${{ secrets.SERVER_USER }} # The username to log in to the remote server
+          password: ${{ secrets.SERVER_PASSWORD }} # The password for the remote server
+          port: ${{ secrets.PORT }}
           script: |
-            echo "Berhasil Connect ke server"
+            echo "Berhasil Connect ke Server"
 
-            cd /home/qadriaditya0/cicd_database_example
-            echo "berhasil masuk ke folder qadriaditya0"
+            cd /home/dul/MKEPL-DATABASE
+            echo "Berhasil Masuk ke Folder"
 
-            sudo docker compose up -d # Menjalankan docker compose di server
-            echo "Berhasil Menjalankan Docker Compose"
+            sudo docker compose up -d # Start the Docker containers in detached mode
+            echo "Berhasil Jalankan Docker Compose"
+
+            # CI (Continuous Integration) untuk Database
+            echo "Menunggu Server MySQL Siap"
+            sleep 30 # Wait for 30 seconds to ensure MySQL is ready
+
+            sudo docker exec mysql_devel_container mysql -u root -pTelkom123! -e "SHOW DATABASES;" # mengecek apakah database udah siap
+
+            # CD (Continuous Deployment) untuk Database
+            echo "DUMP DATABASE dari mysql_devel...."
+            sudo docker exec mysql_devel_container mysqldump -u root -pTelkom123! --databases academics_devel > /home/dul/MKEPL-DATABASE/academics_devel.sql
+
+            echo "Copy dump ke mysql_prod...."
+            sudo docker cp /home/dul/MKEPL-DATABASE/academics_devel.sql mysql_prod_container:/tap/academics_devel.sql
+
+            echo "Import dump ke mysql_prod...."
+            sudo docker exec mysql_prod_container sh -c "mysql -u root -pTelkom123! academics < /tap/academics_devel.sql"
+
+            echo "Berhasil Import ke mysql_prod"
