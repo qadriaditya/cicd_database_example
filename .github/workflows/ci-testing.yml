@@ -1,0 +1,46 @@
+name: CI Testing (Maven)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci_testing:
+    name: Run Maven Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout My Code
+        uses: actions/checkout@v4  # Checkout ke repository code yang kita gunakan
+      - name: SSH Connect
+        uses: appleboy/ssh-action@v1 # Digunakan untuk konek ke server melalui SSH
+        with:
+          host: ${{ secrets.SERVER_HOST }} # IP Address Server
+          username: ${{ secrets.SERVER_USER }} # Username SSH
+          password: ${{ secrets.SERVER_PASSWORD }} # Password SSH
+          script: |
+            echo "Berhasil Konek ke Server"
+            echo "Masuk dulu ke Folder YIS"
+            cd /home/yis
+            echo "Berhasil Masuk ke Folder YIS"
+
+            echo "Mengecek apakah ini adalah git repository"
+            if [ -d ".git" ]; then
+              echo "Ada git repository"
+              git pull origin main # Update repository ke branch main
+            else
+              echo "Gak ada git repository"
+              git clone https://github.com/yudhaislamisulistya/cicd_database_example .
+            fi
+
+            echo "Berhasil Update Repository"
+            echo "Mencoba untuk Menginstall Maven"
+            sudo apt-get update -y
+            sudo apt-get install -y maven
+            echo "Berhasil Install Maven"
+
+            cd /home/yis/sample-ci-testing
+            echo "Berhasil Masuk ke Folder sample-ci-testing"
+            echo "Mencoba untuk Test Maven"
+            mvn clean test
+            echo "Berhasil Test Maven"
