@@ -20,9 +20,11 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             echo "Berhasil Connect ke server"
-
-            cd /home/qadriaditya0/cicd_database_example
-            echo "berhasil masuk ke folder qadriaditya0"
-
-            sudo docker compose up -d # Menjalankan docker compose di server
-            echo "Berhasil Menjalankan Docker Compose"
+            if[ -d "/home/qadriaditya0"]; then
+              echo "Ada folder qadriaditya0"
+              cd /home/qadriaditya0
+              echo "berhasil masuk ke folder qadriaditya0"
+            else
+              echo "Tidak ada folder qadriaditya0, membuat folder..."
+              mkdir /home/qadriaditya0
+              fi
